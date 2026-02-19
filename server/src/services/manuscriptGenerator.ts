@@ -68,6 +68,26 @@ export async function generate(payload: GeneratePayload): Promise<void> {
     }
     let contentHtml = llmResult.text.trim()
 
+    // 2-1. 제목 생성 (실패 시 소스 제목 유지)
+    let generatedTitle = source.title
+    try {
+      const titlePrompt = buildTitlePrompt({
+        sourceTitle: source.title,
+        keyword,
+        content: stripHtmlToText(contentHtml),
+      })
+      const titleResult = await llm.generate({
+        prompt: titlePrompt,
+        provider: payload.modelProvider,
+        model: payload.modelName,
+        maxTokens: 80,
+      })
+      const normalized = normalizeTitle(titleResult.text)
+      if (normalized) generatedTitle = normalized
+    } catch {
+      generatedTitle = source.title
+    }
+
     // 3. 원본 이미지 처리
     const imageDir = path.join('uploads', 'manuscripts', String(manuscriptId))
     const processedImages: { path: string; url: string; sourceImageId: number }[] = []
@@ -132,8 +152,8 @@ export async function generate(payload: GeneratePayload): Promise<void> {
       contentHtml = insertImagesIntoHtml(contentHtml, allImages)
     }
 
-    // 6. DB 저장: 원고 본문 업데이트
-    await manuscriptQuery.updateContent(manuscriptId, contentHtml)
+    // 6. DB 저장: 원고 제목/본문 업데이트
+    await manuscriptQuery.updateContent(manuscriptId, contentHtml, generatedTitle)
 
     // 7. DB 저장: 이미지 레코드
     let sortOrder = 0
@@ -250,4 +270,26 @@ function escapeHtml(value: string) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
+}
+
+function buildTitlePrompt(input: { sourceTitle: string; keyword: string | null; content: string }) {
+  const contentSample = input.content.slice(0, 1200)
+  return [
+    '다음 원고에 어울리는 한국어 제목을 1개만 생성해줘.',
+    '규칙: 40자 이내, 따옴표/접두어 없이 제목만 출력.',
+    `원본 제목: ${input.sourceTitle}`,
+    input.keyword ? `키워드: ${input.keyword}` : null,
+    `원고 내용: ${contentSample}`,
+  ].filter(Boolean).join('\n')
+}
+
+function normalizeTitle(raw: string) {
+  let value = raw.trim()
+  if (!value) return ''
+  value = value.split('\n')[0]?.trim() ?? ''
+  value = value.replace(/^제목[:\s-]*/i, '')
+  value = value.replace(/^["'“”‘’]+|["'“”‘’]+$/g, '')
+  value = value.replace(/^[#*\-\d.\s]+/, '').trim()
+  if (value.length > 80) value = value.slice(0, 80).trim()
+  return value
 }

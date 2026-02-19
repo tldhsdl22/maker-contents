@@ -3,18 +3,22 @@
 /* Global look & feel */
 :root {
   color-scheme: light;
-  --cf-bg: #f5f6fb;
+  --cf-bg: #f7f8ff;
   --cf-surface: #ffffff;
-  --cf-border: #e5e7eb;
-  --cf-accent: #4f46e5;
-  --cf-shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
-  --cf-shadow-soft: 0 6px 22px rgba(15, 23, 42, 0.08);
+  --cf-border: #e2e8f0;
+  --cf-accent: #6366f1;
+  --cf-accent-strong: #4338ca;
+  --cf-accent-soft: #e0e7ff;
+  --cf-ring: rgba(99, 102, 241, 0.35);
+  --cf-shadow: 0 16px 44px rgba(15, 23, 42, 0.12);
+  --cf-shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 body {
   background:
-    radial-gradient(1200px circle at 8% -10%, #eef2ff 0, transparent 55%),
-    radial-gradient(1200px circle at 92% -20%, #f1f5f9 0, transparent 45%),
+    radial-gradient(1200px circle at 6% -12%, #e0e7ff 0, transparent 55%),
+    radial-gradient(1000px circle at 96% -18%, #fef3c7 0, transparent 50%),
+    radial-gradient(900px circle at 50% 110%, #dbeafe 0, transparent 45%),
     var(--cf-bg);
   color: #0f172a;
 }
@@ -24,8 +28,8 @@ body {
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(226, 232, 240, 0.7);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.9), rgba(224, 231, 255, 0.6));
+  border: 1px solid rgba(199, 210, 254, 0.6);
   box-shadow: var(--cf-shadow-soft);
   backdrop-filter: blur(16px);
 }
@@ -46,10 +50,11 @@ body {
 .hover-lift:hover {
   transform: translateY(-2px);
   box-shadow: var(--cf-shadow);
+  border-color: rgba(99, 102, 241, 0.25);
 }
 
 .text-gradient {
-  background: linear-gradient(120deg, #0f172a, #475569);
+  background: linear-gradient(120deg, #0f172a, #4f46e5);
   -webkit-background-clip: text;
   color: transparent;
 }
@@ -58,9 +63,9 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0f172a, #1f2937);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.22);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: linear-gradient(135deg, #312e81, #6366f1);
+  box-shadow: 0 16px 30px rgba(67, 56, 202, 0.25);
+  border: 1px solid rgba(165, 180, 252, 0.4);
 }
 
 .logo-wordmark {
@@ -70,7 +75,7 @@ body {
 }
 
 .logo-wordmark-accent {
-  color: #4f46e5;
+  color: var(--cf-accent);
 }
 
 .btn-base {
@@ -101,28 +106,28 @@ body {
 .btn-primary {
   color: #fff;
   border: 1px solid transparent;
-  background: linear-gradient(120deg, #4f46e5, #6366f1);
-  box-shadow: 0 12px 26px rgba(79, 70, 229, 0.28);
+  background: linear-gradient(120deg, var(--cf-accent), #818cf8);
+  box-shadow: 0 14px 30px rgba(99, 102, 241, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  background: linear-gradient(120deg, #4338ca, #4f46e5);
-  box-shadow: 0 16px 30px rgba(79, 70, 229, 0.35);
+  background: linear-gradient(120deg, var(--cf-accent-strong), var(--cf-accent));
+  box-shadow: 0 18px 34px rgba(99, 102, 241, 0.38);
 }
 
 .btn-secondary {
   color: #334155;
   border: 1px solid rgba(148, 163, 184, 0.4);
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  background: linear-gradient(120deg, #ffffff, #eef2ff);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
 }
 
 .btn-secondary:hover {
   transform: translateY(-1px);
-  border-color: rgba(79, 70, 229, 0.4);
+  border-color: rgba(99, 102, 241, 0.45);
   color: #1e293b;
-  background: #fff;
+  background: linear-gradient(120deg, #ffffff, #e0e7ff);
 }
 
 .btn-ghost {
@@ -133,7 +138,7 @@ body {
 
 .btn-ghost:hover {
   color: #1e293b;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(224, 231, 255, 0.6);
 }
 
 .btn-link {

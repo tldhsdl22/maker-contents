@@ -29,6 +29,21 @@ export default function PublishModal({
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  function normalizeUrl(raw: string) {
+    const trimmed = raw.trim()
+    if (!trimmed) return { normalized: '', error: '포스팅 URL을 입력해 주세요.' }
+    const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+    try {
+      const parsed = new URL(withProtocol)
+      if (!/^https?:$/.test(parsed.protocol)) {
+        return { normalized: '', error: '올바른 URL을 입력해 주세요.' }
+      }
+      return { normalized: parsed.toString(), error: '' }
+    } catch {
+      return { normalized: '', error: '올바른 URL을 입력해 주세요.' }
+    }
+  }
+
   useEffect(() => {
     if (!open) return
     setUrl(initialUrl || '')
@@ -40,10 +55,11 @@ export default function PublishModal({
 
   const detectedPlatform = useMemo(() => {
     try {
-      const parsed = new URL(url.trim())
+      const candidate = /^https?:\/\//i.test(url.trim()) ? url.trim() : `https://${url.trim()}`
+      const parsed = new URL(candidate)
       const host = parsed.hostname
       if (host.includes('blog.naver.com') || host.includes('m.blog.naver.com')) return 'blog'
-      if (host.includes('cafe.naver.com')) return 'cafe'
+      if (host.includes('cafe.naver.com') || host.includes('m.cafe.naver.com')) return 'cafe'
     } catch {
       return null
     }
@@ -55,25 +71,20 @@ export default function PublishModal({
   }, [detectedPlatform])
 
   async function handleSubmit() {
-    const trimmedUrl = url.trim()
-    if (!trimmedUrl) {
-      setError('포스팅 URL을 입력해 주세요.')
-      return
-    }
-    try {
-      new URL(trimmedUrl)
-    } catch {
-      setError('올바른 URL을 입력해 주세요.')
+    const { normalized, error: urlError } = normalizeUrl(url)
+    if (urlError) {
+      setError(urlError)
       return
     }
     setError('')
     setLoading(true)
     try {
       await onSubmit({
-        url: trimmedUrl,
+        url: normalized,
         platform,
         keyword: keyword.trim() || null,
       })
+      setUrl(normalized)
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : '포스팅 완료 처리에 실패했습니다.')

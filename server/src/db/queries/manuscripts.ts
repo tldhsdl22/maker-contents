@@ -105,10 +105,10 @@ export async function findByUser(userId: number) {
   return rows
 }
 
-export async function updateContent(id: number, contentHtml: string) {
+export async function updateContent(id: number, contentHtml: string, title: string) {
   await pool.query(
-    `UPDATE manuscripts SET content_html = ?, status = 'generated' WHERE id = ?`,
-    [contentHtml, id]
+    `UPDATE manuscripts SET title = ?, content_html = ?, status = 'generated' WHERE id = ?`,
+    [title, contentHtml, id]
   )
 }
 
