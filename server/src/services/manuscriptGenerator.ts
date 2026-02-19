@@ -4,7 +4,7 @@ import * as manuscriptQuery from '../db/queries/manuscripts.js'
 import * as sourceQuery from '../db/queries/sources.js'
 import * as llm from './llm.js'
 import * as imageAi from './imageAi.js'
-import { isS3Enabled, uploadLocalFile, cleanupLocalFile } from './imageStorage.js'
+import { uploadLocalFile, cleanupLocalFile } from './imageStorage.js'
 
 export interface GeneratePayload {
   manuscriptId: number
@@ -164,16 +164,9 @@ export async function generate(payload: GeneratePayload): Promise<void> {
 }
 
 async function storeGeneratedImage(localPath: string, storageKey: string) {
-  if (isS3Enabled()) {
-    const uploaded = await uploadLocalFile(localPath, storageKey)
-    await cleanupLocalFile(localPath)
-    return { path: uploaded.key, url: uploaded.url }
-  }
-
-  return {
-    path: localPath,
-    url: `/${localPath.replace(/\\/g, '/')}`,
-  }
+  const uploaded = await uploadLocalFile(localPath, storageKey)
+  await cleanupLocalFile(localPath)
+  return { path: uploaded.key, url: uploaded.url }
 }
 
 function insertImagesIntoHtml(html: string, imageUrls: string[]): string {

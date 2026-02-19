@@ -73,7 +73,7 @@ export async function cleanupLocalFile(localPath: string) {
 
 export async function deleteStoredFile(filePath: string) {
   const normalized = filePath.replace(/\\/g, '/')
-  if (S3_ENABLED && !normalized.includes('uploads/')) {
+  if (!normalized.includes('uploads/')) {
     const client = getS3Client()
     await client.send(new DeleteObjectCommand({
       Bucket: S3_BUCKET!,
