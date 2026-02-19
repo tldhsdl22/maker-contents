@@ -1,0 +1,60 @@
+---
+description: ContentFoundry 코딩 컨벤션
+globs: "**/*.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+
+# 코딩 컨벤션
+
+## 프론트엔드 (client/)
+
+- React + Vite + Tailwind CSS
+- `client/src/pages/` - 페이지 컴포넌트
+- `client/src/components/` - 기능별 폴더로 구분
+- `client/src/hooks/` - 커스텀 훅
+- `client/src/services/` - API 호출 함수
+- `client/src/types/` - 타입 정의
+- React Router로 클라이언트 라우팅
+
+## 백엔드 (server/)
+
+- Express + Node.js
+- `server/src/routes/` - 라우트 정의
+- `server/src/middleware/` - 인증, 권한 미들웨어
+- `server/src/db/` - DB 커넥션 + 쿼리 함수
+- `server/src/services/` - 비즈니스 로직, 외부 API 연동
+- `server/src/jobs/` - 스케줄러, 작업 큐
+
+## DB 접근
+
+- ORM 사용하지 않음, raw SQL로 직접 작성
+- mysql2 패키지 사용, 커넥션 풀 관리
+- Prepared Statement 필수 (SQL injection 방지)
+- 쿼리 함수는 `server/src/db/queries/` 하위에 도메인별 파일로 분리
+
+## 인증
+
+- JWT 직접 구현 (jsonwebtoken 패키지)
+- Access Token: Authorization 헤더 (Bearer)
+- Express 미들웨어에서 JWT 검증 + 역할 체크 일괄 처리
+
+## 네이밍
+
+- 컴포넌트: PascalCase (`SourceList.tsx`)
+- 유틸/훅: camelCase (`useAuth.ts`)
+- API 라우트: kebab-case (`/api/image-templates/`)
+- 타입: PascalCase, `types.ts` 파일에 모아서 관리
+- DB 테이블: snake_case (`image_templates`)
+- DB 쿼리 함수: camelCase (`findUserById`)
+
+## 역할 기반 권한
+
+- 관리자(admin): 시스템 설정 + 모든 사용자 기능
+- 일반 사용자(user): 콘텐츠 생산 워크플로우
+- Express 미들웨어로 JWT 검증 + 권한 체크를 일괄 처리
+
+## 외부 서비스 추상화
+
+- 이미지 생성 AI(나노바나나), LLM(여러 개) 등은 추상화 레이어를 통해 호출
+- `server/src/services/` 하위에 인터페이스 + 구현체 분리
+- LLM은 여러 모델을 사용하므로 공통 인터페이스로 감싸서 교체 가능하게

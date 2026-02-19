@@ -1,0 +1,13 @@
+{
+  "name": "content-foundry",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "install:all": "npm install --prefix client && npm install --prefix server"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.992.0"
+  }
+}

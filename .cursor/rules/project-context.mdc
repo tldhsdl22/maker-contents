@@ -1,0 +1,48 @@
+---
+description: ContentFoundry 프로젝트 컨텍스트 - 매 대화 시작 시 자동 로드
+alwaysApply: true
+---
+
+# ContentFoundry 프로젝트
+
+뉴스 기사를 수집 → AI 원고 생성 → 이미지 배치 → 네이버 블로그/카페 포스팅 → 성과 추적하는 콘텐츠 생산 시스템.
+
+## 기술 스택
+
+- Frontend: React (Vite) + Tailwind CSS
+- Backend: Express + Node.js
+- DB: MySQL (raw SQL, ORM 사용 안 함)
+- Auth: JWT 직접 구현
+- LLM: 여러 LLM 사용 (추상화 레이어로 교체 가능)
+- Image AI: 나노바나나 (추상화 레이어로 교체 가능)
+- Editor: TipTap (WYSIWYG)
+- Queue: 직접 구현 (DB 기반 작업 큐)
+- Scheduler: node-cron
+- Deploy: AWS EC2, Ubuntu 22.04
+- 사용자: 5~10명 팀
+
+## 프로젝트 구조
+
+- `client/` - React 프론트엔드
+- `server/` - Express 백엔드
+
+## 기능 목록 (docs/features/ 참조)
+
+| ID | 기능 | 파일 |
+|----|------|------|
+| F-001 | 인증/사용자 관리 | F-001-auth.md |
+| F-002 | 소스 크롤링 | F-002-crawling.md |
+| F-003 | 프롬프트 관리 | F-003-prompts.md |
+| F-004 | 이미지 템플릿 관리 | F-004-image-templates.md |
+| F-005 | 원고 생성 | F-005-manuscript-generation.md |
+| F-006 | 원고 편집/관리 | F-006-manuscript-editor.md |
+| F-007 | 포스팅 관리 | F-007-posting.md |
+| F-008 | 성과 추적 | F-008-performance.md |
+| F-009 | 대시보드 | F-009-dashboard.md |
+
+## 작업 규칙
+
+1. 작업 시작 전 `docs/STATUS.md`를 읽어 현재 진행 상태를 파악할 것
+2. 특정 기능 구현 시 해당 `docs/features/F-XXX-*.md`를 읽어 상세 스펙을 확인할 것
+3. 작업 완료 후 `docs/STATUS.md`를 업데이트할 것
+4. 중요한 아키텍처 결정이 있으면 `docs/STATUS.md`의 결정 기록 섹션에 추가할 것
