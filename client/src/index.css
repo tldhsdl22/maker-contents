@@ -85,7 +85,18 @@ body {
   gap: 0.4rem;
   border-radius: 0.75rem;
   font-weight: 600;
+  cursor: pointer;
   transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
 }
 
 .btn-sm {

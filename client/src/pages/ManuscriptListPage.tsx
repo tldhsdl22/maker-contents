@@ -98,20 +98,29 @@ export default function ManuscriptListPage() {
       </div>
 
       {/* 상태별 필터 탭 */}
-      <div className="mb-6 flex gap-1 rounded-lg bg-gray-100 p-1">
-        {STATUS_TABS.map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => handleTabChange(tab.key)}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition ${
-              currentStatus === tab.key
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="surface-card hover-lift mb-6 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900">상태 필터</h2>
+            <p className="mt-1 text-xs text-gray-400">원고 상태별로 빠르게 분류합니다.</p>
+          </div>
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-500">Filter</span>
+        </div>
+        <div className="mt-4 flex gap-1 rounded-lg bg-gray-100 p-1">
+          {STATUS_TABS.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => handleTabChange(tab.key)}
+              className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition ${
+                currentStatus === tab.key
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {error && (
@@ -126,9 +135,18 @@ export default function ManuscriptListPage() {
         <EmptyState />
       ) : (
         <>
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="surface-card hover-lift overflow-hidden">
+            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+              <div>
+                <h2 className="text-base font-semibold text-gray-900">원고 목록</h2>
+                <p className="mt-1 text-xs text-gray-400">편집/삭제/포스팅 완료 처리</p>
+              </div>
+              <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600">
+                {total.toLocaleString()}건
+              </span>
+            </div>
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-gray-200 bg-gray-50">
+              <thead className="border-b border-gray-100 bg-gray-50/80">
                 <tr>
                   <th className="px-6 py-3 font-medium text-gray-500">제목</th>
                   <th className="px-6 py-3 font-medium text-gray-500">상태</th>

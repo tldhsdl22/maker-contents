@@ -75,40 +75,42 @@ export default function SourceListPage() {
       </div>
 
       {/* 검색 + 필터 */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative">
-            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              value={searchInput}
-              onChange={e => setSearchInput(e.target.value)}
-              placeholder="기사 제목 검색..."
-              className="h-9 rounded-lg border border-gray-200 bg-white/80 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-            />
-          </div>
-          <button
-            type="submit"
-            className="btn-base btn-primary btn-md h-9"
-          >
-            검색
-          </button>
-          {search && (
+      <div className="surface-card hover-lift mb-6 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <form onSubmit={handleSearch} className="flex flex-wrap gap-2">
+            <div className="relative">
+              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                placeholder="기사 제목 검색..."
+                className="h-9 rounded-lg border border-gray-200 bg-white/80 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              />
+            </div>
             <button
-              type="button"
-              onClick={() => { setSearch(''); setSearchInput(''); setPage(1) }}
-              className="btn-base btn-secondary btn-md h-9"
+              type="submit"
+              className="btn-base btn-primary btn-md h-9"
             >
-              초기화
+              검색
             </button>
-          )}
-        </form>
+            {search && (
+              <button
+                type="button"
+                onClick={() => { setSearch(''); setSearchInput(''); setPage(1) }}
+                className="btn-base btn-secondary btn-md h-9"
+              >
+                초기화
+              </button>
+            )}
+          </form>
 
-        <div className="flex flex-wrap gap-1.5">
-          <CategoryChip label="전체" active={category === ''} onClick={() => handleCategoryChange('')} />
-          {categories.map(cat => (
-            <CategoryChip key={cat} label={cat} active={category === cat} onClick={() => handleCategoryChange(cat)} />
-          ))}
+          <div className="flex flex-wrap gap-1.5">
+            <CategoryChip label="전체" active={category === ''} onClick={() => handleCategoryChange('')} />
+            {categories.map(cat => (
+              <CategoryChip key={cat} label={cat} active={category === cat} onClick={() => handleCategoryChange(cat)} />
+            ))}
+          </div>
         </div>
       </div>
 

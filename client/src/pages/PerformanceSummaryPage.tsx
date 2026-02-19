@@ -74,7 +74,7 @@ export default function PerformanceSummaryPage() {
           <h1 className="text-2xl font-bold text-gray-900">성과 집계</h1>
           <p className="mt-1 text-sm text-gray-500">순위·조회·댓글을 모아 성과를 판단합니다.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="surface-card hover-lift flex items-center gap-2 px-3 py-2">
           <label className="text-xs font-medium text-gray-500">정렬</label>
           <select
             value={sortKey}
@@ -93,16 +93,32 @@ export default function PerformanceSummaryPage() {
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard title="포스팅 수" value={`${stats.total}건`} subtitle="전체 포스팅 완료 기준" />
-        <SummaryCard title="추적 중" value={`${stats.tracking}건`} subtitle="현재 성과 수집 진행" />
-        <SummaryCard title="최고 순위" value={stats.bestRank ? `${stats.bestRank}위` : '—'} subtitle="순위권 데이터 기준" />
-        <SummaryCard title="평균 순위" value={stats.avgRank ? `${stats.avgRank}위` : '—'} subtitle="순위권 데이터 기준" />
+      <div className="surface-card hover-lift p-5">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900">요약 지표</h2>
+            <p className="mt-1 text-xs text-gray-400">포스팅 완료 기준</p>
+          </div>
+          <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600">Summary</span>
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <SummaryCard title="포스팅 수" value={`${stats.total}건`} subtitle="전체 포스팅 완료 기준" />
+          <SummaryCard title="추적 중" value={`${stats.tracking}건`} subtitle="현재 성과 수집 진행" />
+          <SummaryCard title="최고 순위" value={stats.bestRank ? `${stats.bestRank}위` : '—'} subtitle="순위권 데이터 기준" />
+          <SummaryCard title="평균 순위" value={stats.avgRank ? `${stats.avgRank}위` : '—'} subtitle="순위권 데이터 기준" />
+        </div>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="surface-card hover-lift mt-6 overflow-hidden">
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">포스팅 성과 목록</h2>
+            <p className="mt-1 text-xs text-gray-400">성과 상세 페이지로 이동할 수 있습니다.</p>
+          </div>
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-500">List</span>
+        </div>
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 bg-gray-50">
+          <thead className="border-b border-gray-100 bg-gray-50/80">
             <tr>
               <th className="px-6 py-3 font-medium text-gray-500">원고</th>
               <th className="px-6 py-3 font-medium text-gray-500">플랫폼</th>
@@ -136,11 +152,17 @@ export default function PerformanceSummaryPage() {
                       {item.posted_at ? new Date(item.posted_at).toLocaleDateString('ko-KR') : '—'}
                     </p>
                   </td>
-                  <td className="px-6 py-3 text-gray-500">
-                    {item.posting_platform === 'cafe' ? '카페' : item.posting_platform === 'blog' ? '블로그' : '—'}
+                  <td className="px-6 py-3">
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                      {item.posting_platform === 'cafe' ? '카페' : item.posting_platform === 'blog' ? '블로그' : '—'}
+                    </span>
                   </td>
                   <td className="px-6 py-3 text-gray-500">{item.posting_keyword || item.keyword || '—'}</td>
-                  <td className="px-6 py-3 text-gray-600">{item.latest_rank ? `${item.latest_rank}위` : '순위권 외'}</td>
+                  <td className="px-6 py-3">
+                    <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600">
+                      {item.latest_rank ? `${item.latest_rank}위` : '순위권 외'}
+                    </span>
+                  </td>
                   <td className="px-6 py-3 text-gray-600">{item.latest_views ?? '—'}</td>
                   <td className="px-6 py-3 text-gray-600">{item.latest_comments ?? '—'}</td>
                   <td className="px-6 py-3">
