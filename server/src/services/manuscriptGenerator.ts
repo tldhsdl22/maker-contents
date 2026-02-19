@@ -211,7 +211,7 @@ function insertImagesIntoHtml(html: string, imageUrls: string[]): string {
 }
 
 function extractBlocks(html: string): string[] {
-  const $ = load(html, { decodeEntities: false })
+  const $ = load(html)
   const blockEls = $('p, h2, h3, h4, ul, ol, blockquote')
 
   if (blockEls.length > 0) {
@@ -237,7 +237,7 @@ function renderImageTag(url: string) {
 }
 
 function stripHtmlToText(html: string) {
-  const $ = load(html, { decodeEntities: false })
+  const $ = load(html)
   return $.root().text().replace(/\s+/g, ' ').trim()
 }
 

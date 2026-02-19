@@ -61,7 +61,11 @@ async function generateWithOpenAI(prompt: string, model: string, maxTokens = 120
     }),
   })
 
-  const data = await res.json()
+  const data = (await res.json()) as {
+    error?: { message?: string }
+    choices?: Array<{ message?: { content?: string } }>
+    usage?: { total_tokens?: number }
+  }
   if (!res.ok) {
     throw new Error(data?.error?.message || 'OpenAI 호출에 실패했습니다.')
   }
@@ -90,7 +94,11 @@ async function generateWithAnthropic(prompt: string, model: string, maxTokens = 
     }),
   })
 
-  const data = await res.json()
+  const data = (await res.json()) as {
+    error?: { message?: string }
+    content?: Array<{ text?: string }>
+    usage?: { output_tokens?: number }
+  }
   if (!res.ok) {
     throw new Error(data?.error?.message || 'Claude 호출에 실패했습니다.')
   }
@@ -117,7 +125,10 @@ async function generateWithGemini(prompt: string, model: string, maxTokens = 120
     }
   )
 
-  const data = await res.json()
+  const data = (await res.json()) as {
+    error?: { message?: string }
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>
+  }
   if (!res.ok) {
     throw new Error(data?.error?.message || 'Gemini 호출에 실패했습니다.')
   }

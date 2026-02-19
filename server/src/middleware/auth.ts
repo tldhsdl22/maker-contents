@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
-import jwt from 'jsonwebtoken'
+import jwt, { type SignOptions } from 'jsonwebtoken'
 import { config } from '../config/index.js'
 import { findById } from '../db/queries/users.js'
 
@@ -22,8 +22,9 @@ declare global {
 }
 
 export function generateToken(payload: JwtPayload): string {
+  const expiresIn = config.jwt.expiresIn as SignOptions['expiresIn']
   return jwt.sign(payload, config.jwt.secret, {
-    expiresIn: config.jwt.expiresIn,
+    expiresIn,
   })
 }
 
