@@ -35,15 +35,15 @@ export default function ManuscriptEditPage() {
   const [showCopied, setShowCopied] = useState(false)
   const [publishOpen, setPublishOpen] = useState(false)
   const [posting, setPosting] = useState<Posting | null>(null)
-  const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>()
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastSavedContent = useRef<string>('')
   const lastSavedTitle = useRef<string>('')
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        strike: true,
-        blockquote: true,
+        strike: {},
+        blockquote: {},
       }),
       TextStyle,
       Color,
