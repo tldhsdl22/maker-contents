@@ -1,6 +1,19 @@
 node_modules
 dist
-.env
-.env.local
+
+# Env
+.env*
+!.env.example
+
+# Logs
 *.log
+logs
+
+# Uploads / runtime
+uploads
+tmp
+
+# OS / editor
 .DS_Store
+.vscode
+.idea

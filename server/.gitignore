@@ -1,5 +1,19 @@
 node_modules
 dist
+
+# Env
+.env*
+!.env.example
+
+# Logs
 *.log
-.env
-.env.local
+logs
+
+# Uploads / runtime
+uploads
+tmp
+*.pid
+pids
+.cache
+.nyc_output
+coverage
