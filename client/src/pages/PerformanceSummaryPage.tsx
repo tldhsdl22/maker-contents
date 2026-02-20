@@ -4,7 +4,7 @@ import { manuscriptService } from '../services/manuscript.js'
 import { ApiError } from '../services/api.js'
 import type { Manuscript } from '../types/manuscript.js'
 
-type SortKey = 'recent' | 'rank' | 'views' | 'comments'
+type SortKey = 'recent' | 'rank'
 
 export default function PerformanceSummaryPage() {
   const navigate = useNavigate()
@@ -34,22 +34,11 @@ export default function PerformanceSummaryPage() {
     if (sortKey === 'recent') {
       return copy.sort((a, b) => (new Date(b.posted_at ?? 0).getTime() - new Date(a.posted_at ?? 0).getTime()))
     }
-    if (sortKey === 'rank') {
-      return copy.sort((a, b) => {
-        const ar = a.latest_rank ?? 99999
-        const br = b.latest_rank ?? 99999
-        if (ar === br) {
-          const av = a.latest_views ?? 0
-          const bv = b.latest_views ?? 0
-          return bv - av
-        }
-        return ar - br
-      })
-    }
-    if (sortKey === 'views') {
-      return copy.sort((a, b) => (b.latest_views ?? 0) - (a.latest_views ?? 0))
-    }
-    return copy.sort((a, b) => (b.latest_comments ?? 0) - (a.latest_comments ?? 0))
+    return copy.sort((a, b) => {
+      const ar = a.latest_rank ?? 99999
+      const br = b.latest_rank ?? 99999
+      return ar - br
+    })
   }, [manuscripts, sortKey])
 
   const stats = useMemo(() => {
@@ -72,7 +61,7 @@ export default function PerformanceSummaryPage() {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">성과 집계</h1>
-          <p className="mt-1 text-sm text-gray-500">순위·조회·댓글을 모아 성과를 판단합니다.</p>
+          <p className="mt-1 text-sm text-gray-500">네이버 검색 순위 변동을 추적합니다.</p>
         </div>
         <div className="surface-card hover-lift flex items-center gap-2 px-3 py-2">
           <label className="text-xs font-medium text-gray-500">정렬</label>
@@ -82,8 +71,6 @@ export default function PerformanceSummaryPage() {
             className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
           >
             <option value="rank">순위 좋은 순</option>
-            <option value="views">조회수 높은 순</option>
-            <option value="comments">댓글 많은 순</option>
             <option value="recent">최근 포스팅 순</option>
           </select>
         </div>
@@ -124,8 +111,6 @@ export default function PerformanceSummaryPage() {
               <th className="px-6 py-3 font-medium text-gray-500">플랫폼</th>
               <th className="px-6 py-3 font-medium text-gray-500">키워드</th>
               <th className="px-6 py-3 font-medium text-gray-500">순위</th>
-              <th className="px-6 py-3 font-medium text-gray-500">조회</th>
-              <th className="px-6 py-3 font-medium text-gray-500">댓글</th>
               <th className="px-6 py-3 font-medium text-gray-500">추적</th>
               <th className="px-6 py-3 font-medium text-gray-500">작업</th>
             </tr>
@@ -133,13 +118,13 @@ export default function PerformanceSummaryPage() {
           <tbody className="divide-y divide-gray-100">
             {loading ? (
               <tr>
-                <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-400">
+                <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-400">
                   불러오는 중...
                 </td>
               </tr>
             ) : sorted.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-400">
+                <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-400">
                   포스팅된 원고가 없습니다.
                 </td>
               </tr>
@@ -163,8 +148,6 @@ export default function PerformanceSummaryPage() {
                       {item.latest_rank ? `${item.latest_rank}위` : '순위권 외'}
                     </span>
                   </td>
-                  <td className="px-6 py-3 text-gray-600">{item.latest_views ?? '—'}</td>
-                  <td className="px-6 py-3 text-gray-600">{item.latest_comments ?? '—'}</td>
                   <td className="px-6 py-3">
                     <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
                       item.tracking_status === 'completed'

@@ -152,12 +152,24 @@ export default function ManuscriptEditPage() {
       setShowCopied(true)
       setTimeout(() => setShowCopied(false), 2000)
     } catch {
-      const textarea = document.createElement('textarea')
-      textarea.value = html
-      document.body.appendChild(textarea)
-      textarea.select()
+      const container = document.createElement('div')
+      container.setAttribute('contenteditable', 'true')
+      container.style.position = 'fixed'
+      container.style.left = '-9999px'
+      container.style.top = '0'
+      container.style.opacity = '0'
+      container.innerHTML = html
+      document.body.appendChild(container)
+
+      const selection = window.getSelection()
+      const range = document.createRange()
+      range.selectNodeContents(container)
+      selection?.removeAllRanges()
+      selection?.addRange(range)
       document.execCommand('copy')
-      document.body.removeChild(textarea)
+
+      selection?.removeAllRanges()
+      document.body.removeChild(container)
       setShowCopied(true)
       setTimeout(() => setShowCopied(false), 2000)
     }

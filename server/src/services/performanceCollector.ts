@@ -1,27 +1,56 @@
 import axios from 'axios'
 import * as performanceQuery from '../db/queries/performance.js'
 
-const NAVER_CAFE_API_BASE = 'https://article.cafe.naver.com/gw/v4/cafes'
+const NAVER_BLOG_SEARCH_API = 'https://openapi.naver.com/v1/search/blog.json'
+const NAVER_CAFE_SEARCH_API = 'https://openapi.naver.com/v1/search/cafearticle.json'
+const MAX_SEARCH_RESULTS = 300
 
-type CafeMetrics = {
-  views: number | null
-  comments: number | null
-  isAccessible: boolean
+type NaverSearchKey = {
+  clientId: string
+  clientSecret: string
 }
 
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value))
+type NaverSearchResponse = {
+  total: number
+  start: number
+  display: number
+  items: Array<{ link: string }>
 }
 
-function getRandomInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min
+let searchKeyPool: NaverSearchKey[] | null = null
+let searchKeyIndex = 0
+let warnedMissingKeys = false
+
+function parseKeyList(raw?: string): string[] {
+  if (!raw) return []
+  return raw.split(',').map(value => value.trim()).filter(Boolean)
 }
 
-function getNextRank(prevRank: number | null) {
-  if (Math.random() < 0.2) return null
-  if (!prevRank) return getRandomInt(1, 50)
-  const delta = getRandomInt(-3, 3)
-  return clamp(prevRank + delta, 1, 50)
+function loadSearchKeyPool() {
+  if (searchKeyPool) return searchKeyPool
+  const ids = parseKeyList(process.env.NAVER_SEARCH_CLIENT_IDS || process.env.NAVER_SEARCH_CLIENT_ID)
+  const secrets = parseKeyList(process.env.NAVER_SEARCH_CLIENT_SECRETS || process.env.NAVER_SEARCH_CLIENT_SECRET)
+  const count = Math.min(ids.length, secrets.length)
+
+  searchKeyPool = Array.from({ length: count }, (_, idx) => ({
+    clientId: ids[idx],
+    clientSecret: secrets[idx],
+  }))
+
+  if (!searchKeyPool.length && !warnedMissingKeys) {
+    console.warn('[performance] 네이버 검색 API 키가 설정되지 않았습니다.')
+    warnedMissingKeys = true
+  }
+
+  return searchKeyPool
+}
+
+function getNextSearchKey(): NaverSearchKey | null {
+  const pool = loadSearchKeyPool()
+  if (!pool.length) return null
+  const key = pool[searchKeyIndex % pool.length]
+  searchKeyIndex = (searchKeyIndex + 1) % pool.length
+  return key
 }
 
 function extractCafeIdentifiers(rawUrl: string): { cafeKey: string; articleId: string; useCafeId: boolean } | null {
@@ -64,36 +93,98 @@ function extractCafeIdentifiers(rawUrl: string): { cafeKey: string; articleId: s
   return null
 }
 
-async function fetchCafeMetrics(rawUrl: string): Promise<CafeMetrics | null> {
-  const ids = extractCafeIdentifiers(rawUrl)
-  if (!ids) return null
+function extractBlogIdentifiers(rawUrl: string): { blogId: string; logNo: string } | null {
+  try {
+    const url = new URL(rawUrl)
+    if (!url.hostname.endsWith('blog.naver.com')) return null
 
-  const endpoint = `${NAVER_CAFE_API_BASE}/${ids.cafeKey}/articles/${ids.articleId}`
-  const res = await axios.get<{ result?: { article?: { readCount?: number; commentCount?: number; isOpen?: boolean; isReadable?: boolean } } }>(
-    endpoint,
-    {
-      params: { useCafeId: ids.useCafeId ? 'true' : 'false' },
+    const blogId = url.searchParams.get('blogId')
+    const logNo = url.searchParams.get('logNo')
+    if (blogId && logNo) {
+      return { blogId, logNo }
+    }
+
+    const segments = url.pathname.split('/').filter(Boolean)
+    if (segments.length >= 2) {
+      const [pathBlogId, pathLogNo] = segments
+      if (pathBlogId && pathLogNo) {
+        return { blogId: pathBlogId, logNo: pathLogNo }
+      }
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
+function normalizeUrl(rawUrl: string) {
+  try {
+    const url = new URL(rawUrl)
+    const hostname = url.hostname.replace(/^m\./, '').toLowerCase()
+    const pathname = url.pathname.replace(/\/$/, '').toLowerCase()
+    return `${hostname}${pathname}`
+  } catch {
+    return rawUrl.trim().toLowerCase()
+  }
+}
+
+function matchBlogUrl(targetUrl: string, candidateUrl: string) {
+  const target = extractBlogIdentifiers(targetUrl)
+  const candidate = extractBlogIdentifiers(candidateUrl)
+  if (target && candidate) {
+    return target.blogId === candidate.blogId && target.logNo === candidate.logNo
+  }
+  return normalizeUrl(targetUrl) === normalizeUrl(candidateUrl)
+}
+
+function matchCafeUrl(targetUrl: string, candidateUrl: string) {
+  const target = extractCafeIdentifiers(targetUrl)
+  const candidate = extractCafeIdentifiers(candidateUrl)
+  if (target && candidate) {
+    if (target.articleId === candidate.articleId) {
+      return target.cafeKey === candidate.cafeKey || target.useCafeId !== candidate.useCafeId
+    }
+  }
+  return normalizeUrl(targetUrl) === normalizeUrl(candidateUrl)
+}
+
+async function fetchNaverRank(params: { keyword: string; targetUrl: string; platform: 'blog' | 'cafe' }) {
+  const key = getNextSearchKey()
+  if (!key) return null
+
+  const endpoint = params.platform === 'blog' ? NAVER_BLOG_SEARCH_API : NAVER_CAFE_SEARCH_API
+  const display = 100
+  const maxStart = Math.min(MAX_SEARCH_RESULTS, 1000)
+  const matchUrl = params.platform === 'blog' ? matchBlogUrl : matchCafeUrl
+
+  for (let start = 1; start <= maxStart; start += display) {
+    const response = await axios.get<NaverSearchResponse>(endpoint, {
+      params: {
+        query: params.keyword,
+        start,
+        display,
+      },
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Referer': rawUrl,
+        'X-Naver-Client-Id': key.clientId,
+        'X-Naver-Client-Secret': key.clientSecret,
       },
       timeout: 10_000,
+    })
+
+    const items = response.data?.items ?? []
+    for (let idx = 0; idx < items.length; idx += 1) {
+      if (matchUrl(params.targetUrl, items[idx].link)) {
+        return start + idx
+      }
     }
-  )
 
-  const article = res.data?.result?.article
-  if (!article) {
-    return { views: null, comments: null, isAccessible: false }
+    if (!items.length || start + items.length > maxStart) {
+      break
+    }
   }
 
-  const isAccessible = (article.isOpen ?? true) && (article.isReadable ?? true)
-
-  return {
-    views: typeof article.readCount === 'number' ? article.readCount : null,
-    comments: typeof article.commentCount === 'number' ? article.commentCount : null,
-    isAccessible,
-  }
+  return null
 }
 
 export async function collectPerformanceData() {
@@ -109,37 +200,23 @@ export async function collectPerformanceData() {
       continue
     }
 
-    const latest = await performanceQuery.getLatestData(tracking.id)
-
     let nextViews: number | null = null
     let nextComments: number | null = null
     let isAccessible = true
+    let nextRank: number | null = null
 
-    if (tracking.platform === 'cafe') {
+    if (tracking.keyword && tracking.url) {
       try {
-        const metrics = await fetchCafeMetrics(tracking.url)
-        if (metrics) {
-          isAccessible = metrics.isAccessible
-          nextViews = metrics.views
-          nextComments = metrics.comments
-        } else {
-          isAccessible = false
-        }
+        nextRank = await fetchNaverRank({
+          keyword: tracking.keyword,
+          targetUrl: tracking.url,
+          platform: tracking.platform,
+        })
       } catch (err) {
-        console.error('[performance] 카페 성과 수집 실패:', (err as Error).message)
+        console.error('[performance] 검색 순위 수집 실패:', (err as Error).message)
         isAccessible = false
       }
-    } else {
-      isAccessible = Math.random() > 0.05
-      nextViews = isAccessible
-        ? (latest?.view_count ?? getRandomInt(50, 200)) + getRandomInt(5, 60)
-        : null
-      nextComments = isAccessible
-        ? (latest?.comment_count ?? getRandomInt(0, 5)) + getRandomInt(0, 3)
-        : null
     }
-
-    const nextRank = isAccessible ? getNextRank(latest?.keyword_rank ?? null) : null
 
     await performanceQuery.insertData({
       tracking_id: tracking.id,

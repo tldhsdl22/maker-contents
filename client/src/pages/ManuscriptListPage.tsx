@@ -265,8 +265,6 @@ function ManuscriptRow({ manuscript, onEdit, onDelete, onPublish, onPerformance 
             )}
             <div className="flex items-center gap-3 text-gray-500">
               <span>순위: {manuscript.latest_rank ? `${manuscript.latest_rank}위` : '순위권 외'}</span>
-              <span>조회: {manuscript.latest_views ?? '—'}</span>
-              <span>댓글: {manuscript.latest_comments ?? '—'}</span>
             </div>
           </div>
         )}

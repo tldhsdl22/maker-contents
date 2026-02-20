@@ -40,8 +40,6 @@ export default function PerformanceDetailPage() {
   }, [summary])
 
   const latestRank = summary?.latest_rank ?? null
-  const latestViews = summary?.latest_views ?? null
-  const latestComments = summary?.latest_comments ?? null
 
   if (loading) {
     return (
@@ -79,21 +77,11 @@ export default function PerformanceDetailPage() {
         </button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4">
         <SummaryCard
           title="현재 순위"
           value={latestRank ? `${latestRank}위` : '순위권 외'}
           subtitle={summary.keyword ? `키워드: ${summary.keyword}` : '키워드 없음'}
-        />
-        <SummaryCard
-          title="현재 조회수"
-          value={latestViews !== null ? `${latestViews.toLocaleString()}회` : '집계중'}
-          subtitle="포스팅 누적 조회수"
-        />
-        <SummaryCard
-          title="현재 댓글 수"
-          value={latestComments !== null ? `${latestComments.toLocaleString()}개` : '집계중'}
-          subtitle="포스팅 누적 댓글"
         />
       </div>
 
@@ -121,10 +109,8 @@ export default function PerformanceDetailPage() {
         <p className="mt-2 text-xs text-gray-400">진행률 {Math.round(progress * 100)}%</p>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+      <div className="mt-6 grid gap-6">
         <TrendCard title="키워드 순위 추이" unit="위" data={data.map(d => d.keyword_rank)} />
-        <TrendCard title="조회수 추이" unit="회" data={data.map(d => d.view_count)} />
-        <TrendCard title="댓글 수 추이" unit="개" data={data.map(d => d.comment_count)} />
       </div>
 
       <div className="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white">
@@ -133,15 +119,13 @@ export default function PerformanceDetailPage() {
             <tr>
               <th className="px-6 py-3 font-medium text-gray-500">수집 시각</th>
               <th className="px-6 py-3 font-medium text-gray-500">순위</th>
-              <th className="px-6 py-3 font-medium text-gray-500">조회수</th>
-              <th className="px-6 py-3 font-medium text-gray-500">댓글</th>
               <th className="px-6 py-3 font-medium text-gray-500">접근</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {data.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-10 text-center text-sm text-gray-400">
+                <td colSpan={3} className="px-6 py-10 text-center text-sm text-gray-400">
                   아직 수집된 데이터가 없습니다.
                 </td>
               </tr>
@@ -152,8 +136,6 @@ export default function PerformanceDetailPage() {
                     {new Date(row.collected_at).toLocaleString('ko-KR')}
                   </td>
                   <td className="px-6 py-3 text-gray-600">{row.keyword_rank ? `${row.keyword_rank}위` : '순위권 외'}</td>
-                  <td className="px-6 py-3 text-gray-600">{row.view_count ?? '—'}</td>
-                  <td className="px-6 py-3 text-gray-600">{row.comment_count ?? '—'}</td>
                   <td className="px-6 py-3 text-gray-600">{row.is_accessible ? '접근 가능' : '접근 불가'}</td>
                 </tr>
               ))

@@ -102,13 +102,12 @@ export default function DashboardPage() {
                       <th className="px-5 py-3 font-medium text-gray-500">플랫폼</th>
                       <th className="px-5 py-3 font-medium text-gray-500">키워드</th>
                       <th className="px-5 py-3 font-medium text-gray-500">순위</th>
-                      <th className="px-5 py-3 font-medium text-gray-500">조회/댓글</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {recentPosts.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-5 py-10 text-center text-sm text-gray-400">
+                        <td colSpan={4} className="px-5 py-10 text-center text-sm text-gray-400">
                           아직 포스팅 성과가 없습니다.
                         </td>
                       </tr>
@@ -135,9 +134,6 @@ export default function DashboardPage() {
                             <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600">
                               {post.latest_rank ? `${post.latest_rank}위` : '순위권 외'}
                             </span>
-                          </td>
-                          <td className="px-5 py-3 text-gray-500">
-                            {post.latest_views ?? '—'} / {post.latest_comments ?? '—'}
                           </td>
                         </tr>
                       ))

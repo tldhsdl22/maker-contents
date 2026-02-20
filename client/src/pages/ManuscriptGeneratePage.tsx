@@ -12,11 +12,21 @@ import type { ImageTemplate } from '../types/imageTemplate.js'
 type Phase = 'settings' | 'generating' | 'done' | 'error'
 type LengthOption = 'short' | 'medium' | 'long'
 
+type PersistedSettings = {
+  promptId?: number
+  templateId?: number
+  keyword?: string
+  lengthOption?: LengthOption
+  newImageCount?: number
+}
+
 const LENGTH_OPTIONS: { value: LengthOption; label: string; desc: string }[] = [
   { value: 'short', label: '짧게', desc: '500자 내외' },
   { value: 'medium', label: '보통', desc: '1000자 내외' },
   { value: 'long', label: '길게', desc: '2000자 내외' },
 ]
+
+const SETTINGS_STORAGE_KEY = 'manuscript_generate_settings'
 
 export default function ManuscriptGeneratePage() {
   const [searchParams] = useSearchParams()
@@ -43,6 +53,25 @@ export default function ManuscriptGeneratePage() {
   const [generationError, setGenerationError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hydratedRef = useRef(false)
+
+  function readStoredSettings(): PersistedSettings | null {
+    try {
+      const raw = localStorage.getItem(SETTINGS_STORAGE_KEY)
+      if (!raw) return null
+      return JSON.parse(raw) as PersistedSettings
+    } catch {
+      return null
+    }
+  }
+
+  function persistSettings(next: PersistedSettings) {
+    try {
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(next))
+    } catch {
+      // ignore storage errors
+    }
+  }
 
   // Load source, prompts, templates
   useEffect(() => {
@@ -62,12 +91,32 @@ export default function ManuscriptGeneratePage() {
         setSource(sourceRes.source)
 
         const activePrompts = promptRes.prompts.filter(p => p.is_active)
-        setPrompts(activePrompts)
-        if (activePrompts.length > 0) setPromptId(activePrompts[0].id)
-
         const activeTemplates = templateRes.templates.filter(t => t.is_active)
+        setPrompts(activePrompts)
         setTemplates(activeTemplates)
-        if (activeTemplates.length > 0) setTemplateId(activeTemplates[0].id)
+
+        const stored = readStoredSettings()
+        const promptFromStore = stored?.promptId
+        const templateFromStore = stored?.templateId
+        const keywordFromStore = stored?.keyword ?? ''
+        const lengthFromStore = stored?.lengthOption ?? 'medium'
+        const imageCountFromStore = stored?.newImageCount ?? 0
+
+        const initialPromptId =
+          promptFromStore && activePrompts.some(p => p.id === promptFromStore)
+            ? promptFromStore
+            : activePrompts[0]?.id ?? 0
+        const initialTemplateId =
+          templateFromStore && activeTemplates.some(t => t.id === templateFromStore)
+            ? templateFromStore
+            : activeTemplates[0]?.id ?? 0
+
+        setPromptId(initialPromptId)
+        setTemplateId(initialTemplateId)
+        setKeyword(keywordFromStore)
+        setLengthOption(lengthFromStore)
+        setNewImageCount(Math.min(10, Math.max(0, imageCountFromStore)))
+        hydratedRef.current = true
       } catch (err) {
         setError(err instanceof ApiError ? err.message : '데이터를 불러오지 못했습니다.')
       } finally {
@@ -101,6 +150,17 @@ export default function ManuscriptGeneratePage() {
       if (pollRef.current) clearTimeout(pollRef.current)
     }
   }, [])
+
+  useEffect(() => {
+    if (!hydratedRef.current) return
+    persistSettings({
+      promptId,
+      templateId,
+      keyword,
+      lengthOption,
+      newImageCount,
+    })
+  }, [promptId, templateId, keyword, lengthOption, newImageCount])
 
   async function handleGenerate() {
     if (!promptId || !templateId) return

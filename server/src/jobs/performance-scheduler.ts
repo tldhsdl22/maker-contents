@@ -21,13 +21,13 @@ async function executeCollection() {
 }
 
 export function startPerformanceScheduler() {
-  // 매시 정각 실행
-  cron.schedule('0 * * * *', () => {
+  // 3시간 간격 실행
+  cron.schedule('0 */3 * * *', () => {
     console.log('[performance] 정기 성과 수집 시작')
     executeCollection()
   })
 
-  console.log('[performance] 성과 수집 스케줄러 등록 (매시 정각)')
+  console.log('[performance] 성과 수집 스케줄러 등록 (3시간 간격)')
 
   // 서버 시작 시 첫 수집 (15초 후)
   setTimeout(() => {
