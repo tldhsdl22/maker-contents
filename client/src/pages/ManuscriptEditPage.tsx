@@ -212,7 +212,7 @@ export default function ManuscriptEditPage() {
     <div className="flex h-full flex-col">
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-3">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <button
             onClick={() => navigate('/manuscripts')}
             className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
@@ -224,7 +224,7 @@ export default function ManuscriptEditPage() {
             type="text"
             value={title}
             onChange={e => { setTitle(e.target.value); setSaved(false); scheduleAutoSave() }}
-            className="border-none bg-transparent text-lg font-semibold text-gray-900 focus:outline-none focus:ring-0 w-[400px]"
+            className="min-w-[280px] flex-1 border-none bg-transparent text-lg font-semibold text-gray-900 focus:outline-none focus:ring-0"
             placeholder="원고 제목"
           />
           {saved && <span className="text-xs text-green-600">저장됨</span>}
